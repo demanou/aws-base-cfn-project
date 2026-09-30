@@ -18,21 +18,40 @@ on:
         default: 'project-stack'
         type: string
       
-      BucketName:
-        description: 'Enter your Bucket Name'
+      VpcID:
+        Description: "Enter your VPC ID"
+        Default: "vpc-03aa2d44aeeee4e02"
         required: true
         type: string
 
-      LambdaRuntime:
-        description: 'Enter your Lambda Runtime'
+      SubnetID:
+        Description: "Enter your Subnet ID"
+        Default: "subnet-08c44f4adae36b232"
         required: true
-        default: 'nodejs20.x'
         type: string
 
-      LambdaHandler:
-        description: 'Enter your Lambda Handler'
+      AmiID:
+        Description: "Enter your AMI ID"
+        Default: "ami-0ca1796cb5fd02cb8"
         required: true
-        default: 'index.handler'
+        type: string
+
+      SecurityGroupID:
+        Description: "Enter your Security Group ID"
+        Default: "sg-058255f528c7c43bf"
+        required: true
+        type: string
+
+      InstanceType:
+        Description: "Enter your Instance Type"
+        Default: "t3.micro"
+        required: true
+        type: string
+
+      KeyPair:
+        Description: "Enter your Key Pair"
+        Default: "dnag-kp"
+        required: true
         type: string
 
 permissions:

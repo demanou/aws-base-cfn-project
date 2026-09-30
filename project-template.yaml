@@ -1,0 +1,136 @@
+# aws-base-cfn-project
+
+# Build a CFN Template in YAML with the following resourec
+# - KMS Key
+# - S3 Bucket where Encryption with KMS Key
+# - IAM Role for Lambda, Policy: Get and Put and List for S3 Bucket Access
+# - Lambda Function
+# - Lambda Permission
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: "Enter your Bucket Name"
+    Default: ""
+
+  LambdaRuntime:
+    Type: String
+    Description: "Enter your Lambda Runtime"
+    Default: "nodejs20.x"
+
+  LambdaHandler:
+    Type: String
+    Description: "Enter your Lambda Handler Filename"
+    Default: "index.handler"
+
+
+Resources:
+  myKey:
+    Type: 'AWS::KMS::Key'
+    Properties:
+      Description: An example symmetric encryption KMS key
+      EnableKeyRotation: true
+      PendingWindowInDays: 7
+      KeyPolicy:
+        Version: 2012-10-17
+        Id: key-default-1
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: 'arn:aws:iam::962500058125:root'
+            Action: 'kms:*'
+            Resource: '*'
+          - Sid: Allow administration of the key
+            Effect: Allow
+            Principal:
+              AWS: 'arn:aws:iam::962500058125:user/github-action-ci'
+            Action:
+              - 'kms:Create*'
+              - 'kms:Describe*'
+              - 'kms:Enable*'
+              - 'kms:List*'
+              - 'kms:Put*'
+              - 'kms:Update*'
+              - 'kms:Revoke*'
+              - 'kms:Disable*'
+              - 'kms:Get*'
+              - 'kms:Delete*'
+              - 'kms:ScheduleKeyDeletion'
+              - 'kms:CancelKeyDeletion'
+            Resource: '*'
+          - Sid: Allow use of the key
+            Effect: Allow
+            Principal:
+              AWS: 'arn:aws:iam::962500058125:user/github-action-ci'
+            Action:
+              - 'kms:DescribeKey'
+              - 'kms:Encrypt'
+              - 'kms:Decrypt'
+              - 'kms:ReEncrypt*'
+              - 'kms:GenerateDataKey'
+              - 'kms:GenerateDataKeyWithoutPlaintext'
+            Resource: '*'
+
+  S3Bucket:
+    Type: 'AWS::S3::Bucket'
+    DeletionPolicy: Delete
+    Properties:
+      BucketName: !Ref BucketName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+              # KMSMasterKeyID: !Ref myKey - returns KMS key
+              KMSMasterKeyID: !GetAtt myKey.Arn # return KMS arn
+
+  LambdaRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: S3AccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 's3:*'
+                Resource: '*'
+  
+  primerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: !Ref LambdaRuntime
+      Role: !GetAtt LambdaRole.Arn
+      Handler: !Ref LambdaHandler
+      Code:
+        ZipFile: |
+          const { S3Client, ListBucketsCommand } = require("@aws-sdk/client-s3");
+          const s3 = new S3Client({ region: "ca-central-1" }); 
+
+          exports.handler = async function(event) {
+            const command = new ListBucketsCommand({});
+            const response = await s3.send(command);
+            return response.Buckets;
+          };
+      Description: List Amazon S3 buckets in ca-central-1.
+      TracingConfig:
+        Mode: Active
+
+  s3Permission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt primerFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref 'AWS::AccountId'
+      SourceArn: !GetAtt S3Bucket.Arn

@@ -1,4 +1,4 @@
-name: Deploy EC2 using AWS CloudFormatio, destroy
+name: Deploy CloudFormation to AWS
 
 on:
   workflow_dispatch:
@@ -18,40 +18,21 @@ on:
         default: 'project-stack'
         type: string
       
-      VpcID:
-        Description: "Enter your VPC ID"
-        Default: "vpc-03aa2d44aeeee4e02"
+      BucketName:
+        description: 'Enter your Bucket Name'
         required: true
         type: string
 
-      SubnetID:
-        Description: "Enter your Subnet ID"
-        Default: "subnet-08c44f4adae36b232"
+      LambdaRuntime:
+        description: 'Enter your Lambda Runtime'
         required: true
+        default: 'nodejs20.x'
         type: string
 
-      AmiID:
-        Description: "Enter your AMI ID"
-        Default: "ami-0ca1796cb5fd02cb8"
+      LambdaHandler:
+        description: 'Enter your Lambda Handler'
         required: true
-        type: string
-
-      SecurityGroupID:
-        Description: "Enter your Security Group ID"
-        Default: "sg-058255f528c7c43bf"
-        required: true
-        type: string
-
-      InstanceType:
-        Description: "Enter your Instance Type"
-        Default: "t3.micro"
-        required: true
-        type: string
-
-      KeyPair:
-        Description: "Enter your Key Pair"
-        Default: "dnag-kp"
-        required: true
+        default: 'index.handler'
         type: string
 
 permissions:
@@ -97,12 +78,9 @@ jobs:
             --stack-name "${{ github.event.inputs.StackName }}" \
             --template-file "${{ env.TEMPLATE_FILE }}" \
             --parameter-overrides \
-              VpcID="${{ github.event.inputs.VpcID }}" \
-              SubnetID="${{ github.event.inputs.SubnetID }}" \
-              AmiID="${{ github.event.inputs.AmiID }}" \
-              SecurityGroupID="${{ github.event.inputs.SecurityGroupID }}" \
-              KeyPair="${{ github.event.inputs.KeyPair }}" \
-              InstanceType="${{ github.event.inputs.InstanceType }}" \
+              BucketName="${{ github.event.inputs.BucketName }}" \
+              LambdaRuntime="${{ github.event.inputs.LambdaRuntime }}" \
+              LambdaHandler="${{ github.event.inputs.LambdaHandler }}" \
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
 
       - name: Delete CloudFormation Stack

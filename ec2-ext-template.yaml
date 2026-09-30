@@ -1,0 +1,41 @@
+Resources:
+  # 1. Define the VPC
+  MyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+
+  # 2. Define a Subnet inside the VPC (Requires VpcId)
+  MySubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MyVPC          # Directly linked to the VPC ID
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [ 0, !GetAZs "" ]
+
+  # 3. Define a Security Group inside the VPC (Requires VpcId)
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH access
+      VpcId: !Ref MyVPC          # Directly linked to the VPC ID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+  # 4. Define the EC2 Instance (Linked to VPC via Subnet and Security Group)
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      ImageId: ami-0ca1796cb5fd02cb8  # Replace with a valid AMI for your region
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          SubnetId: !Ref MySubnet            # Indirectly links the EC2 to the VPC
+          GroupSet:
+            - !Ref MySecurityGroup           # Applies the VPC-bound Security Group

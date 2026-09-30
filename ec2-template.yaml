@@ -1,0 +1,49 @@
+# Deploy an EC2 instance
+# Parameters: VPC-ID, Subnet-ID, AMI-ID, SecurityGroup-ID, Instance-Type, Key-Pair
+# Resources:
+#  -VPC, Subnet, SecurityGroup, KeyPair, InstanceType, AMI-ID
+
+Parameters:
+  VpcID:
+    Type: String
+    Description: "Enter your VPC ID"
+    Default: "vpc-03aa2d44aeeee4e02"
+
+  SubnetID:
+    Type: String
+    Description: "Enter your Subnet ID"
+    Default: "subnet-08c44f4adae36b232"
+
+  AmiID:
+    Type: String
+    Description: "Enter your AMI ID"
+    Default: "ami-0ca1796cb5fd02cb8"
+  
+  SecurityGroupID:
+    Type: String
+    Description: "Enter your Security Group ID"
+    Default: "sg-058255f528c7c43bf"
+
+  InstanceType:
+    Type: String
+    Description: "Enter your Instance Type"
+    Default: "t3.micro"
+
+  KeyPair:
+    Type: String
+    Description: "Enter your Key Pair"
+    Default: "dnag-kp"
+
+Resources:
+  cfnInstance:
+      Type: 'AWS::EC2::Instance'
+      Properties: 
+        ImageId: !Ref AmiID
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref KeyPair
+        SubnetId: !Ref SubnetID
+        SecurityGroupIds:
+          - !Ref SecurityGroupID
+
+
+

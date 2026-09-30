@@ -78,12 +78,9 @@ jobs:
             --stack-name "${{ github.event.inputs.StackName }}" \
             --template-file "${{ env.TEMPLATE_FILE }}" \
             --parameter-overrides \
-              VpcID="${{ github.event.inputs.VpcID }}" \
-              SubnetID="${{ github.event.inputs.SubnetID }}" \
-              AmiID="${{ github.event.inputs.AmiID }}" \
-              SecurityGroupID="${{ github.event.inputs.SecurityGroupID }}" \
-              KeyPair="${{ github.event.inputs.KeyPair }}" \
-              InstanceType="${{ github.event.inputs.InstanceType }}" \
+              BucketName="${{ github.event.inputs.BucketName }}" \
+              LambdaRuntime="${{ github.event.inputs.LambdaRuntime }}" \
+              LambdaHandler="${{ github.event.inputs.LambdaHandler }}" \
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
 
       - name: Delete CloudFormation Stack

@@ -1,4 +1,4 @@
-name: Deploy CloudFormation to AWS
+name: Deploy EC2 using AWS CloudFormation
 
 on:
   workflow_dispatch:

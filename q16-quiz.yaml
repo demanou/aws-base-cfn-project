@@ -16,13 +16,23 @@ Parameters:
     Type: String
     Default: "ami-0ca1796cb5fd02cb8"
 
+  VpcID:
+    Description: "Enter your VPC ID"
+    Default: "vpc-03aa2d44aeeee4e02"
+    Type: String
+
+  SubnetID:
+    Type: String
+    Description: "Enter your Subnet ID"
+    Default: "subnet-08c44f4adae36b232"
+
 Resources:
   ExamBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref BucketName
       VersioningConfiguration:
-        Enabled: true
+        Status: Enabled
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         IgnorePublicAcls: true
@@ -34,12 +44,20 @@ Resources:
     Properties:
       ImageId: !Ref LatestAmiId
       InstanceType: !Ref InstanceType
+      SubnetId: !Ref SubnetID
+      SecurityGroupIds:
+        - !Ref MySecurityGroup  
+      Tags:
+        - Key: "Name"
+          Value: "DevOps-Exam-Instance"
+
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH access
+      VpcId: !Ref VpcID         
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
           CidrIp: 0.0.0.0/0
-      Tags:
-        - Key: "Name"
-          Value: "DevOps-Exam-Instance"
-

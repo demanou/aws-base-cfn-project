@@ -14,7 +14,7 @@ Parameters:
 
   LatestAmiId:
     Type: String
-    Default: "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
+    Default: "ami-0ca1796cb5fd02cb8"
 
 Resources:
   ExamBucket:

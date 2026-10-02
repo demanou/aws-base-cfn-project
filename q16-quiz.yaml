@@ -1,0 +1,45 @@
+Parameters:
+  InstanceType:
+    Type: String
+    Default: "t3.micro"
+    AllowedValues:
+      - "t2.micro"
+      - "t3.micro"
+      - "t3.small"
+  BucketName:
+    Type: String
+    Description: "Name of the S3 bucket"
+    MinLength: 3
+    MaxLength: 63
+
+  LatestAmiId:
+    Type: String
+    Default: "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
+
+Resources:
+  ExamBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      VersioningConfiguration:
+        Enabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+  
+  ExamInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: "Name"
+          Value: "DevOps-Exam-Instance"
+
